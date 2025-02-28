@@ -28,7 +28,7 @@ jobs:
       - name: Initialize OrangeFox source
         run: |
           mkdir -p ~/orangefox && cd ~/orangefox
-          repo init --depth=1 -u https://gitlab.com/OrangeFox/sync.git -b fox_12.1
+          repo init -u https://github.com/hraj9258/orangefox_sync.git -b master
           repo sync -j$(nproc) --force-sync
 
       - name: Clone device tree
@@ -41,7 +41,6 @@ jobs:
           cd ~/orangefox
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
-          export FOX_BUILD_DEVICE=garnet
           lunch twrp_garnet-eng
 
       - name: Build OrangeFox
@@ -52,7 +51,7 @@ jobs:
       - name: Upload to GitHub Releases
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "~/orangefox/out/target/product/garnet/*.img"
+          artifacts: "~/orangefox/out/target/product/garnet/recovery.img"
           tag: "OrangeFox-garnet-$(date +%Y%m%d)"
           name: "OrangeFox Recovery for Garnet"
           body: "Automated build of OrangeFox recovery for the garnet device."
