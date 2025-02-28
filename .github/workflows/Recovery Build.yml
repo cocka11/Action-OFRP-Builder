@@ -28,7 +28,7 @@ jobs:
       - name: Initialize OrangeFox source
         run: |
           mkdir -p ~/orangefox && cd ~/orangefox
-          repo init --depth=1 -u https://gitlab.com/OrangeFox/sync.git -b fox_11.0
+          repo init --depth=1 -u https://gitlab.com/OrangeFox/sync.git -b fox_12.1
           repo sync -j$(nproc) --force-sync
 
       - name: Clone device tree
