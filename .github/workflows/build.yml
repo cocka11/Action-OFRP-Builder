@@ -33,14 +33,14 @@ jobs:
     run: |
       mkdir fox
       cd fox
-      repo init -u https://gitlab.com/OrangeFox/sync.git -b fox_12.1
+      repo init -u https://gitlab.com/OrangeFox/manifest.git -b android-13.0
       repo sync -j$(nproc --all)
 
   - name: Replace device tree
     run: |
       cd fox
       rm -rf device/garnet
-      git clone https://gitlab.com/OrangeFox/device/garnet.git
+      git clone https://gitlab.com/OrangeFox/device/garnet.git device/garnet
 
   - name: Enable ccache
     run: |
