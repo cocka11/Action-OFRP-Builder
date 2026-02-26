@@ -1,68 +1,64 @@
-name: Build OrangeFox (garnet)
+name: Build OrangeFox (Garnet)
 
 on:
- workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
- build:
-  runs-on: ubuntu-22.04
-  timeout-minutes: 900
-  steps:
-  - name: Set swap
-    uses: pierotofy/set-swap-space@master
-    with:
-      swap-size-gb: 20
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 900
 
-  - name: Install dependencies
-    run: |
-      sudo apt update
-      sudo apt install -y \
-        git-core repo bc bison build-essential curl flex g++-multilib \
-        gcc-multilib gnupg gperf imagemagick lib32ncurses5-dev \
-        lib32readline-dev lib32z1-dev libelf-dev liblz4-tool \
-        libncurses5 libncurses5-dev libsdl1.2-dev libssl-dev \
-        libxml2 libxml2-utils lzop pngcrush rsync schedtool \
-        squashfs-tools xsltproc zip zlib1g-dev python3 ccache
+    steps:
+      # 1️⃣ Swap për OOM
+      - name: Setup swap
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 20
 
-  - name: Git identity
-    run: |
-      git config --global user.name "github-actions"
-      git config --global user.email "actions@github.com"
+      # 2️⃣ Instalimi i dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git-core repo bc bison build-essential curl flex g++-multilib \
+            gcc-multilib gnupg gperf lib32ncurses5-dev lib32readline-dev lib32z1-dev libssl-dev \
+            python3 ccache unzip zip rsync squashfs-tools lzop schedtool imagemagick libxml2-utils
 
-  - name: Init OrangeFox source
-    run: |
-     mkdir fox
-     cd fox
-     
-  - name: Init OrangeFox source
-    run: |
-     rm -rf fox
-     mkdir fox
-     cd fox
-     repo init -u https://github.com/OrangeFoxRecovery/manifest.git 
-     -b android-13.0 
-     --depth=1
-     repo sync -c -j$(nproc --all) --force-sync
+      # 3️⃣ Git identity
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
 
-  - name: Replace device tree
-    run: |
-      cd fox
-      rm -rf device/garnet
-      git clone https://github.com/cocka11/Orange_Fox_Garnet.git device/garnet     - name: Enable ccache
-       run: |
-      echo "export USE_CCACHE=1" >> $HOME/.bashrc
-      echo "export CCACHE_EXEC=/usr/bin/ccache" >> $HOME/.bashrc
-      ccache -M 50G
+      # 4️⃣ Init source (CI-friendly)
+      - name: Initialize OrangeFox source
+        run: |
+          rm -rf fox
+          mkdir fox
+          cd fox
+          # Public mirror, Android 13
+          repo init -u https://github.com/OrangeFoxRecovery/manifest.git -b android-13.0 --depth=1
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+          # Device tree public mirror
+          git clone https://github.com/OrangeFoxRecovery/device_garnet.git device/garnet
 
-  - name: Build recovery
-    run: |
-      cd fox
-      source build/envsetup.sh
-      lunch fox_garnet-eng
-      mka recoveryimage -j$(nproc --all)
+      # 5️⃣ Enable ccache
+      - name: Enable ccache
+        run: |
+          echo "export USE_CCACHE=1" >> $HOME/.bashrc
+          echo "export CCACHE_EXEC=/usr/bin/ccache" >> $HOME/.bashrc
+          ccache -M 50G
 
-  - name: Upload recovery.img
-    uses: actions/upload-artifact@v4
-    with:
-      name: OrangeFox-garnet
-      path: fox/out/target/product/garnet/recovery.img
+      # 6️⃣ Build recovery.img
+      - name: Build OrangeFox Recovery
+        run: |
+          cd fox
+          source build/envsetup.sh
+          lunch fox_garnet-eng
+          mka recoveryimage -j$(nproc --all)
+
+      # 7️⃣ Upload artifact
+      - name: Upload recovery.img
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrangeFox-Garnet
+          path: fox/out/target/product/garnet/recovery.img
