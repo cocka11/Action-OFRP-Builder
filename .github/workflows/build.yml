@@ -40,7 +40,7 @@ jobs:
     run: |
       cd fox
       rm -rf device/garnet
-      git clone https://gitlab.com/OrangeFox/device/garnet.git device/garnet
+      git clone https://gitlab.com/OrangeFox/device/garnet.git
 
   - name: Enable ccache
     run: |
