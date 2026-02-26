@@ -31,31 +31,38 @@ jobs:
 
   - name: Init OrangeFox source
     run: |
-      mkdir fox
-      cd fox
-      repo init -u https://gitlab.com/OrangeFox/manifest.git -b android-13.0
-      repo sync -j$(nproc --all)
+     mkdir fox
+     cd fox
+  
+     git clone https://gitlab.com/OrangeFox/manifest.git .repo/manifests
+     git checkout android-13.0
+  
+     repo init -u https://gitlab.com/OrangeFox/manifest.git 
+     -b android-13.0 
+     --depth=1 
+     --no-clone-bundle 
+     --no-tags
+  
+     repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-  - name: Replace device tree
+     - name: Replace device tree
     run: |
       cd fox
       rm -rf device/garnet
-      git clone https://gitlab.com/OrangeFox/device/garnet.git device/garnet
-
-  - name: Enable ccache
-    run: |
+      git clone https://gitlab.com/OrangeFox/device/garnet.git device/garnet     - name: Enable ccache
+       run: |
       echo "export USE_CCACHE=1" >> $HOME/.bashrc
       echo "export CCACHE_EXEC=/usr/bin/ccache" >> $HOME/.bashrc
       ccache -M 50G
 
-  - name: Build recovery
+   - name: Build recovery
     run: |
       cd fox
       source build/envsetup.sh
       lunch fox_garnet-eng
       mka recoveryimage -j$(nproc --all)
 
-  - name: Upload recovery.img
+   - name: Upload recovery.img
     uses: actions/upload-artifact@v4
     with:
       name: OrangeFox-garnet
