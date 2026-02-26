@@ -33,20 +33,17 @@ jobs:
     run: |
      mkdir fox
      cd fox
-  
+     
   - name: Init OrangeFox source
     run: |
-     mkdir fox
-     cd fox  
-     git clone https://gitlab.com/OrangeFox/manifest.git .repo/manifests
-     git checkout android-13.0
-  
+     rm -rf fox
+     git clone https://gitlab.com/OrangeFox/manifest.git fox
+     cd fox
      repo init -u https://gitlab.com/OrangeFox/manifest.git 
      -b android-13.0 
      --depth=1 
      --no-clone-bundle 
      --no-tags
-  
      repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
   - name: Replace device tree
