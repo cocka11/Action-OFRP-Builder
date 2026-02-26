@@ -1,14 +1,13 @@
 name: Build OrangeFox (garnet)
 
 on:
-workflow_dispatch:
+ workflow_dispatch:
 
 jobs:
-build:
-runs-on: ubuntu-22.04
-timeout-minutes: 900
-
-steps:
+ build:
+  runs-on: ubuntu-22.04
+  timeout-minutes: 900
+  steps:
   - name: Set swap
     uses: pierotofy/set-swap-space@master
     with:
